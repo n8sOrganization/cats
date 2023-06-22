@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # Make tag available for subsequent tasks
+      # Scan commmited code with Trivy
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
           ref: main
 
-      # Scan commmited code with Trivy
+      
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@master
         with:
