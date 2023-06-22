@@ -20,7 +20,7 @@ spec:
         fsGroup: 2000
       containers:
       - name: cats
-        image: natereid/cats:v0.0.27
+        image: natereid/cats:v.0.0.2
         ports:
         - containerPort: 5000
         securityContext:
