@@ -38,11 +38,12 @@ jobs:
           image-ref: ${{ steps.base_image.outputs.BASE_IMAGE }}
           trivy-config: './.trivy.yaml'
 
+      # Set tagger output to use tag for image tag    
       - name: Set tag
         run: echo "VERSION_TAG=$(git describe --dirty --always --tags | sed 's/-.*//' )" >> "$GITHUB_OUTPUT"
         id: tagger
       
-      # Build and push image 
+      # QEMU required for multi platform builds
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -53,6 +54,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Build and push image  
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -60,20 +62,8 @@ jobs:
           push: true
           tags: natereid/cats:${{ steps.tagger.outputs.VERSION_TAG }}
           platforms: linux/arm/v7 #,linux/amd64
-      
-      # Hacky way to wait for Docker hub to respond with new image
-      # - name: Sleep for 5 seconds
-      #   run: sleep 5s
-      #   shell: bash
 
-      # Scan image for vulns with Trivy
-      # - name: Run Trivy vulnerability scanner post build
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     image-ref: 'natereid/cats:${{ steps.tagger.outputs.VERSION_TAG }}'
-          # trivy-config: './.trivy.yaml'
-
-      # Update K8s deployment image tag
+      # Update K8s deployment manifest with new image tag
       - name: Checkout
         uses: actions/checkout@v3
         with:
