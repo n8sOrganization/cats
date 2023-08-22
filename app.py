@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import flask, render_template
 import os
 import random
 
