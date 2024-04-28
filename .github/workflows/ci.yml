@@ -1,0 +1,81 @@
+name: CI
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  configuration:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Scan commmited code with Trivy
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+          ref: main
+
+      
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './app'
+          trivy-config: './.trivy.yaml'
+
+      # Retrieve base image from Dockerfile
+      - name: Base image
+        run: echo "BASE_IMAGE=$(awk '{for (I=1;I<NF;I++) if ($I == "FROM") print $(I+1)}'  ./app/Dockerfile)" >> "$GITHUB_OUTPUT"
+        id: base_image
+
+      # Scan base image with Trivy
+      - name: Run Trivy vulnerability scanner in image mode pre-build
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.base_image.outputs.BASE_IMAGE }}
+          trivy-config: './.trivy.yaml'
+
+      # Set tagger output to use tag for image tag    
+      - name: Set tag
+        run: echo "VERSION_TAG=$(git describe --dirty --always --tags | sed 's/-.*//' )" >> "$GITHUB_OUTPUT"
+        id: tagger
+      
+      # QEMU required for multi platform builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and push image  
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: "{{defaultContext}}:app"
+          push: true
+          tags: natereid/cats:${{ steps.tagger.outputs.VERSION_TAG }}
+          platforms: linux/arm/v7 #,linux/amd64
+
+      # Update K8s deployment manifest with new image tag
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Update manifest
+        run: |
+          sed -i -e "s|image: natereid/cats:.*|image: natereid/cats:${{ steps.tagger.outputs.VERSION_TAG }}|g" ./k8s/catsDeployment.yaml
+ 
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '.'
+          message: "github ci update"
+

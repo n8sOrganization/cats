@@ -1,0 +1,11 @@
+format: table
+exit-code: 1
+severity:
+  - HIGH
+  - CRITICAL
+scan:
+  scanners:
+    - vuln
+    - config
+vulnerability:
+  ignore-unfixed: true
