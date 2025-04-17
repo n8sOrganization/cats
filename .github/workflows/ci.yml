@@ -27,9 +27,9 @@ jobs:
       #     trivy-config: './.trivy.yaml'
 
       # Retrieve base image from Dockerfile
-      # - name: Base image
-      #   run: echo "BASE_IMAGE=$(awk '{for (I=1;I<NF;I++) if ($I == "FROM") print $(I+1)}'  ./app/Dockerfile)" >> "$GITHUB_OUTPUT"
-      #   id: base_image
+      - name: Base image
+        run: echo "BASE_IMAGE=$(awk '{for (I=1;I<NF;I++) if ($I == "FROM") print $(I+1)}'  ./app/Dockerfile)" >> "$GITHUB_OUTPUT"
+        id: base_image
 
       # # Scan base image with Trivy
       # - name: Run Trivy vulnerability scanner in image mode pre-build
