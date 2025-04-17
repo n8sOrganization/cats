@@ -1,7 +1,7 @@
 FROM python:3.8
 
-# set a directory for the app
-WORKDIR /usr/src/app
+# set a directory for the app # src/app
+WORKDIR /usr
 
 # copy all the files to the container
 COPY . .
