@@ -13,9 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # create and set user
-RUN groupadd -r user && useradd -r -g user user
-RUN chown -R user:user /usr/src/app
-USER user
+# RUN groupadd -r user && useradd -r -g user user
+# RUN chown -R user:user /usr/src/app
+# USER user
 
 # run the command
 CMD ["python", "./app.py"]
