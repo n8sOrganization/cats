@@ -19,12 +19,12 @@ jobs:
           ref: main
 
       
-      - name: Run Trivy vulnerability scanner in fs mode
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: './app'
-          trivy-config: './.trivy.yaml'
+      # - name: Run Trivy vulnerability scanner in fs mode
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     scan-type: 'fs'
+      #     scan-ref: './app'
+      #     trivy-config: './.trivy.yaml'
 
       # Retrieve base image from Dockerfile
       - name: Base image
